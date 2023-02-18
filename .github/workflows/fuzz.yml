@@ -1,0 +1,22 @@
+name: Fuzz Parser
+
+on:
+  push:
+    paths:
+      - src/scanner.cc
+  pull_request:
+    paths:
+      - src/scanner.cc
+
+jobs:
+  test:
+    name: Parser fuzzing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: vigoux/tree-sitter-fuzz-action@v1
+      - run: npm install
+        with:
+          language: starlark
+          external-scanner: src/scanner.cc
+          time: 60

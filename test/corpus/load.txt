@@ -1,0 +1,17 @@
+=====================
+Test a load statement
+=====================
+
+load(":foo.bzl", "var", "fct") # loads `var`, and `fct` from `./foo.bzl`
+
+---
+
+(module
+      (expression_statement
+        (call
+          (identifier)
+          (argument_list
+            (string)
+            (string)
+            (string))))
+      (comment))
