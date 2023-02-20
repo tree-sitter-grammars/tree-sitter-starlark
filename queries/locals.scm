@@ -1,13 +1,6 @@
 ;;; Program structure
 (module) @scope
 
-; Loads
-((call
-  function: (identifier) @_fn
-  arguments: (argument_list
-    (string) @definition.import))
-  (#eq? @_fn "load"))
-
 ; Function with parameters, defines parameters
 (parameters
   (identifier) @definition.parameter)
@@ -87,3 +80,12 @@
 
 ;;; REFERENCES
 (identifier) @reference
+
+;; Starlark-specific
+
+; Loads
+((call
+  function: (identifier) @_fn
+  arguments: (argument_list
+    (string) @definition.import))
+  (#eq? @_fn "load"))

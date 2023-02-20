@@ -60,24 +60,6 @@
     function: (identifier) @_func))
  (#any-of? @_func "TypeVar" "NewType"))
 
-; Function calls
-
-(call
-  function: (identifier) @function.call)
-
-(call
-  function: (attribute
-              attribute: (identifier) @method.call))
-
-((call
-   function: (identifier) @constructor)
- (#lua-match? @constructor "^[A-Z]"))
-
-((call
-  function: (attribute
-              attribute: (identifier) @constructor))
- (#lua-match? @constructor "^[A-Z]"))
-
 ;; Decorators
 ((decorator "@" @attribute)
  (#set! "priority" 101))
@@ -269,6 +251,11 @@
 
 ["," "." ":" ";" (ellipsis)] @punctuation.delimiter
 
+;; Error
+(ERROR) @error
+
+;; Starlark-specific
+
 ;; Struct definitions
 ((call
   function: (identifier) @_func
@@ -277,5 +264,22 @@
 	  name: (identifier) @field)))
   (#eq? @_func "struct"))
 
-;; Error
-(ERROR) @error
+;; Function calls
+
+(call
+  function: (identifier) @function.call)
+
+(call
+  function: (attribute
+              attribute: (identifier) @method.call))
+
+((call
+   function: (identifier) @constructor)
+ (#lua-match? @constructor "^[A-Z]"))
+
+((call
+  function: (attribute
+              attribute: (identifier) @constructor))
+ (#lua-match? @constructor "^[A-Z]"))
+
+
