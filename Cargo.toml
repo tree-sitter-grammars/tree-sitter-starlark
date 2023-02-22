@@ -3,6 +3,7 @@ name = "tree-sitter-starlark"
 description = "Starlark grammar for tree-sitter"
 version = "0.0.1"
 authors = ["Amaan Qureshi <amaanq12@gmail.com>"]
+readme = "bindings/rust/README.md"
 keywords = ["incremental", "parsing", "starlark", "bazel", "bzl"]
 categories = ["parsing", "text-editors"]
 repository = "https://github.com/amaanq/tree-sitter-starlark"
