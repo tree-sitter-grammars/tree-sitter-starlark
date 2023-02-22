@@ -7,15 +7,16 @@ on:
   pull_request:
     paths:
       - src/scanner.cc
+  workflow_dispatch:
 
 jobs:
   test:
     name: Parser fuzzing
     runs-on: ubuntu-latest
     steps:
+      - run: npm install
       - uses: actions/checkout@v3
       - uses: vigoux/tree-sitter-fuzz-action@v1
-      - run: npm install
         with:
           language: starlark
           external-scanner: src/scanner.cc
