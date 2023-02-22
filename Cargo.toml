@@ -1,14 +1,15 @@
 [package]
 name = "tree-sitter-starlark"
 description = "Starlark grammar for tree-sitter"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Amaan Qureshi <amaanq12@gmail.com>"]
+license = "MIT"
 readme = "bindings/rust/README.md"
 keywords = ["incremental", "parsing", "starlark", "bazel", "bzl"]
 categories = ["parsing", "text-editors"]
 repository = "https://github.com/amaanq/tree-sitter-starlark"
 edition = "2021"
-license = "MIT"
+autoexamples = false
 
 build = "bindings/rust/build.rs"
 include = ["bindings/rust/*", "grammar.js", "queries/*", "src/*"]
