@@ -479,8 +479,96 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "STRING",
-          "value": "assert"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "STRING",
+                    "value": "assert"
+                  },
+                  "named": true,
+                  "value": "assert_keyword"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SEQ",
+                      "members": [
+                        {
+                          "type": "STRING",
+                          "value": "."
+                        },
+                        {
+                          "type": "ALIAS",
+                          "content": {
+                            "type": "CHOICE",
+                            "members": [
+                              {
+                                "type": "STRING",
+                                "value": "eq"
+                              },
+                              {
+                                "type": "STRING",
+                                "value": "ne"
+                              },
+                              {
+                                "type": "STRING",
+                                "value": "contains"
+                              },
+                              {
+                                "type": "STRING",
+                                "value": "fails"
+                              }
+                            ]
+                          },
+                          "named": true,
+                          "value": "assert_builtin"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "assert_"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "assert_eq"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "assert_ne"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "assert_contains"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "assert_fails"
+                  }
+                ]
+              },
+              "named": true,
+              "value": "assert_keyword"
+            }
+          ]
         },
         {
           "type": "SEQ",
@@ -5267,6 +5355,26 @@
     "primary_expression",
     "pattern",
     "parameter"
-  ]
+  ],
+  "PREC": {
+    "lambda": -2,
+    "typed_parameter": -1,
+    "conditional": -1,
+    "parenthesized_expression": 1,
+    "parenthesized_list_splat": 1,
+    "or": 10,
+    "and": 11,
+    "not": 12,
+    "compare": 13,
+    "bitwise_or": 14,
+    "bitwise_and": 15,
+    "xor": 16,
+    "shift": 17,
+    "plus": 18,
+    "times": 19,
+    "unary": 20,
+    "power": 21,
+    "call": 22
+  }
 }
 

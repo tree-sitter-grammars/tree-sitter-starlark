@@ -43,6 +43,22 @@ module.exports = grammar(python, {
   name: 'starlark',
 
   rules: {
+    assert_statement: $ => seq(
+      choice(
+        seq(
+          alias('assert', $.assert_keyword),
+          optional(seq('.', alias(choice('eq', 'ne', 'contains', 'fails'), $.assert_builtin))),
+        ),
+        alias(choice(
+          'assert_',
+          'assert_eq',
+          'assert_ne',
+          'assert_contains',
+          'assert_fails'), $.assert_keyword),
+      ),
+      commaSep1($.expression),
+    ),
+
     // Starlark has no yield statements
     expression_statement: $ => choice(
       $.expression,

@@ -371,6 +371,14 @@
       "required": true,
       "types": [
         {
+          "type": "assert_builtin",
+          "named": true
+        },
+        {
+          "type": "assert_keyword",
+          "named": true
+        },
+        {
           "type": "expression",
           "named": true
         }
@@ -2488,8 +2496,12 @@
     "named": false
   },
   {
-    "type": "assert",
-    "named": false
+    "type": "assert_builtin",
+    "named": true
+  },
+  {
+    "type": "assert_keyword",
+    "named": true
   },
   {
     "type": "async",

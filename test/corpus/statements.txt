@@ -57,8 +57,10 @@ assert b, c
 
 (module
   (assert_statement
+    (assert_keyword)
     (identifier))
   (assert_statement
+    (assert_keyword)
     (identifier)
     (identifier)))
 
