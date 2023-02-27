@@ -26,15 +26,17 @@ function clone_repo {
 }
 
 clone_repo bazelbuild starlark 32993fa0d1f1e4f3af167d249be95885ba5014ad
+clone_repo mcuadros ascode ca95f0f93cf4a25f08bd9b961b2042efbca72a9d
+clone_repo cruise-automation isopod 9e70e4f706c16c8d354ca00b26220330bcaabfec
 
 known_failures="$(cat script/known_failures.txt)"
 
 # shellcheck disable=2046
 tree-sitter parse -q \
-	'examples/**/BUILD' 'examples/**/WORKSPACE' 'examples/**/*.bzl' \
+	"examples/**/BUILD" "examples/**/WORKSPACE" "examples/**/*.bzl" "examples/**/*.star" "examples/**/*.ipd" \
 	$(for failure in $known_failures; do echo "!${failure}"; done)
 
-example_count=$(find examples -name 'BUILD' -o -name 'WORKSPACE' -o -name '*.bzl' | wc -l)
+example_count=$(find examples -name "BUILD" -o -name "WORKSPACE" -o -name "*.bzl" -o -name "*.star" -o -name "*.ipd" | wc -l)
 failure_count=$(wc -w <<<"$known_failures")
 success_count=$((example_count - failure_count))
 success_percent=$(bc -l <<<"100*${success_count}/${example_count}")

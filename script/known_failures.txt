@@ -1,0 +1,17 @@
+examples/starlark/test_suite/testdata/go/assign.star
+examples/starlark/test_suite/testdata/go/builtins.star
+examples/starlark/test_suite/testdata/go/dict.star
+examples/starlark/test_suite/testdata/go/function.star
+examples/starlark/test_suite/testdata/go/int.star
+examples/starlark/test_suite/testdata/go/list.star
+examples/starlark/test_suite/testdata/go/misc.star
+examples/starlark/test_suite/testdata/go/string.star
+examples/starlark/test_suite/testdata/go/tuple.star
+examples/starlark/test_suite/testdata/java/dict.star
+examples/starlark/test_suite/testdata/java/list_mutation.star
+examples/starlark/test_suite/testdata/java/min_max.star
+examples/starlark/test_suite/testdata/java/reversed.star
+examples/starlark/test_suite/testdata/java/string_slice_index.star
+examples/starlark/test_suite/testdata/rust/int.star
+examples/starlark/test_suite/testdata/rust/josharian_fuzzing.star
+examples/starlark/test_suite/testdata/rust/mutation_during_iteration.star
