@@ -269,7 +269,7 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
         } else if (lexer->lookahead == ' ') {
             indent_length++;
             skip(lexer);
-        } else if (lexer->lookahead == '\r') {
+        } else if (lexer->lookahead == '\r' || lexer->lookahead == '\f') {
             indent_length = 0;
             skip(lexer);
         } else if (lexer->lookahead == '\t') {
@@ -294,9 +294,6 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
             } else {
                 return false;
             }
-        } else if (lexer->lookahead == '\f') {
-            indent_length = 0;
-            skip(lexer);
         } else if (lexer->eof(lexer)) {
             indent_length = 0;
             found_end_of_line = true;
@@ -410,7 +407,7 @@ unsigned tree_sitter_starlark_external_scanner_serialize(void *payload,
     if (delimiter_count > UINT8_MAX) {
         delimiter_count = UINT8_MAX;
     }
-    buffer[size++] = delimiter_count;
+    buffer[size++] = (char)delimiter_count;
 
     if (delimiter_count > 0) {
         memcpy(&buffer[size], scanner->delimiters->data, delimiter_count);
@@ -422,7 +419,7 @@ unsigned tree_sitter_starlark_external_scanner_serialize(void *payload,
            size < TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
          ++iter) {
         // yeah, it narrows the value but it's fine?
-        buffer[size++] = scanner->indents->data[iter];
+        buffer[size++] = (char)scanner->indents->data[iter];
     }
 
     return size;
@@ -449,7 +446,7 @@ void tree_sitter_starlark_external_scanner_deserialize(void *payload,
         }
 
         for (; size < length; size++) {
-            VEC_PUSH(scanner->indents, buffer[size]);
+            VEC_PUSH(scanner->indents, (unsigned char)buffer[size]);
         }
 
         assert(size == length);
