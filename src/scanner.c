@@ -7,37 +7,36 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #define VEC_RESIZE(vec, _cap)                                                  \
-    void *tmp = realloc((vec)->data, (_cap) * sizeof((vec)->data[0]));         \
+    void *tmp = realloc((vec).data, (_cap) * sizeof((vec).data[0]));           \
     assert(tmp != NULL);                                                       \
-    (vec)->data = tmp;                                                         \
-    (vec)->cap = (_cap);
+    (vec).data = tmp;                                                          \
+    (vec).cap = (_cap);
 
 #define VEC_GROW(vec, _cap)                                                    \
-    if ((vec)->cap < (_cap)) {                                                 \
+    if ((vec).cap < (_cap)) {                                                  \
         VEC_RESIZE((vec), (_cap));                                             \
     }
 
 #define VEC_PUSH(vec, el)                                                      \
-    if ((vec)->cap == (vec)->len) {                                            \
-        VEC_RESIZE((vec), MAX(16, (vec)->len * 2));                            \
+    if ((vec).cap == (vec).len) {                                              \
+        VEC_RESIZE((vec), MAX(16, (vec).len * 2));                             \
     }                                                                          \
-    (vec)->data[(vec)->len++] = (el);
+    (vec).data[(vec).len++] = (el);
 
-#define VEC_POP(vec) (vec)->len--;
+#define VEC_POP(vec) (vec).len--;
 
 #define VEC_NEW                                                                \
     { .len = 0, .cap = 0, .data = NULL }
 
-#define VEC_BACK(vec) ((vec)->data[(vec)->len - 1])
+#define VEC_BACK(vec) ((vec).data[(vec).len - 1])
 
 #define VEC_FREE(vec)                                                          \
     {                                                                          \
-        if ((vec)->data != NULL)                                               \
-            free((vec)->data);                                                 \
+        if ((vec).data != NULL)                                                \
+            free((vec).data);                                                  \
     }
 
-#define VEC_CLEAR(vec)                                                         \
-    { (vec)->len = 0; }
+#define VEC_CLEAR(vec) (vec).len = 0;
 
 enum TokenType {
     NEWLINE,
@@ -45,6 +44,7 @@ enum TokenType {
     DEDENT,
     STRING_START,
     STRING_CONTENT,
+    ESCAPE_INTERPOLATION,
     STRING_END,
     COMMENT,
     CLOSE_PAREN,
@@ -127,24 +127,18 @@ static inline void set_end_character(Delimiter *delimiter, int32_t character) {
     }
 }
 
-static inline const char *delimiter_string(Delimiter *delimiter) {
-    if (delimiter->flags & SingleQuote) {
-        return "\'";
-    }
-    if (delimiter->flags & DoubleQuote) {
-        return "\"";
-    }
-    if (delimiter->flags & BackQuote) {
-        return "`";
-    }
-    return "";
-}
-
 typedef struct {
     uint32_t len;
     uint32_t cap;
     uint16_t *data;
 } indent_vec;
+
+static indent_vec indent_vec_new() {
+    indent_vec vec = VEC_NEW;
+    vec.data = calloc(1, sizeof(uint16_t));
+    vec.cap = 1;
+    return vec;
+}
 
 typedef struct {
     uint32_t len;
@@ -152,9 +146,17 @@ typedef struct {
     Delimiter *data;
 } delimiter_vec;
 
+static delimiter_vec delimiter_vec_new() {
+    delimiter_vec vec = VEC_NEW;
+    vec.data = calloc(1, sizeof(Delimiter));
+    vec.cap = 1;
+    return vec;
+}
+
 typedef struct {
-    indent_vec *indents;
-    delimiter_vec *delimiters;
+    indent_vec indents;
+    delimiter_vec delimiters;
+    bool inside_f_string;
 } Scanner;
 
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
@@ -162,7 +164,7 @@ static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
 bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
-                                                const bool *valid_symbols) {
+                                              const bool *valid_symbols) {
     Scanner *scanner = (Scanner *)payload;
 
     bool error_recovery_mode =
@@ -171,13 +173,35 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
                            valid_symbols[CLOSE_PAREN] ||
                            valid_symbols[CLOSE_BRACKET];
 
-    if (valid_symbols[STRING_CONTENT] && scanner->delimiters->len > 0 &&
+    bool advanced_once = false;
+    if (valid_symbols[ESCAPE_INTERPOLATION] && scanner->delimiters.len > 0 &&
+        (lexer->lookahead == '{' || lexer->lookahead == '}') &&
+        !error_recovery_mode) {
+        Delimiter delimiter = VEC_BACK(scanner->delimiters);
+        if (is_format(&delimiter)) {
+            lexer->mark_end(lexer);
+            bool is_left_brace = lexer->lookahead == '{';
+            advance(lexer);
+            advanced_once = true;
+            if ((lexer->lookahead == '{' && is_left_brace) ||
+                (lexer->lookahead == '}' && !is_left_brace)) {
+                advance(lexer);
+                lexer->mark_end(lexer);
+                lexer->result_symbol = ESCAPE_INTERPOLATION;
+                return true;
+            }
+            return false;
+        }
+    }
+
+    if (valid_symbols[STRING_CONTENT] && scanner->delimiters.len > 0 &&
         !error_recovery_mode) {
         Delimiter delimiter = VEC_BACK(scanner->delimiters);
         int32_t end_char = end_character(&delimiter);
-        bool has_content = false;
+        bool has_content = advanced_once;
         while (lexer->lookahead) {
-            if ((lexer->lookahead == '{' || lexer->lookahead == '}') &&
+            if ((advanced_once || lexer->lookahead == '{' ||
+                 lexer->lookahead == '}') &&
                 is_format(&delimiter)) {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = STRING_CONTENT;
@@ -186,23 +210,32 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
             if (lexer->lookahead == '\\') {
                 if (is_raw(&delimiter)) {
                     // Step over the backslash.
-                    lexer->advance(lexer, false);
+                    advance(lexer);
                     // Step over any escaped quotes.
                     if (lexer->lookahead == end_character(&delimiter) ||
                         lexer->lookahead == '\\') {
-                        lexer->advance(lexer, false);
+                        advance(lexer);
+                    }
+                    // Step over newlines
+                    if (lexer->lookahead == '\r') {
+                        advance(lexer);
+                        if (lexer->lookahead == '\n') {
+                            advance(lexer);
+                        }
+                    } else if (lexer->lookahead == '\n') {
+                        advance(lexer);
                     }
                     continue;
                 }
                 if (is_bytes(&delimiter)) {
                     lexer->mark_end(lexer);
-                    lexer->advance(lexer, false);
+                    advance(lexer);
                     if (lexer->lookahead == 'N' || lexer->lookahead == 'u' ||
                         lexer->lookahead == 'U') {
                         // In bytes string, \N{...}, \uXXXX and \UXXXXXXXX are
                         // not escape sequences
                         // https://docs.starlark.org/3/reference/lexical_analysis.html#string-and-bytes-literals
-                        lexer->advance(lexer, false);
+                        advance(lexer);
                     } else {
                         lexer->result_symbol = STRING_CONTENT;
                         return has_content;
@@ -215,17 +248,18 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
             } else if (lexer->lookahead == end_char) {
                 if (is_triple(&delimiter)) {
                     lexer->mark_end(lexer);
-                    lexer->advance(lexer, false);
+                    advance(lexer);
                     if (lexer->lookahead == end_char) {
-                        lexer->advance(lexer, false);
+                        advance(lexer);
                         if (lexer->lookahead == end_char) {
                             if (has_content) {
                                 lexer->result_symbol = STRING_CONTENT;
                             } else {
-                                lexer->advance(lexer, false);
+                                advance(lexer);
                                 lexer->mark_end(lexer);
                                 VEC_POP(scanner->delimiters);
                                 lexer->result_symbol = STRING_END;
+                                scanner->inside_f_string = false;
                             }
                             return true;
                         }
@@ -240,9 +274,10 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
                 if (has_content) {
                     lexer->result_symbol = STRING_CONTENT;
                 } else {
-                    lexer->advance(lexer, false);
+                    advance(lexer);
                     VEC_POP(scanner->delimiters);
                     lexer->result_symbol = STRING_END;
+                    scanner->inside_f_string = false;
                 }
                 lexer->mark_end(lexer);
                 return true;
@@ -276,6 +311,14 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
             indent_length += 8;
             skip(lexer);
         } else if (lexer->lookahead == '#') {
+            // If we haven't found an EOL yet,
+            // then this is a comment after an expression:
+            //   foo = bar # comment
+            // Just return, since we don't want to generate an indent/dedent
+            // token.
+            if (!found_end_of_line) {
+                return false;
+            }
             if (first_comment_indent_length == -1) {
                 first_comment_indent_length = (int32_t)indent_length;
             }
@@ -304,7 +347,7 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
     }
 
     if (found_end_of_line) {
-        if (scanner->indents->len > 0) {
+        if (scanner->indents.len > 0) {
             uint16_t current_indent_length = VEC_BACK(scanner->indents);
 
             if (valid_symbols[INDENT] &&
@@ -314,10 +357,16 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
                 return true;
             }
 
+            bool next_tok_is_string_start = lexer->lookahead == '\"' ||
+                                            lexer->lookahead == '\'' ||
+                                            lexer->lookahead == '`';
+
             if ((valid_symbols[DEDENT] ||
-                 (!valid_symbols[NEWLINE] && !valid_symbols[STRING_START] &&
+                 (!valid_symbols[NEWLINE] &&
+                  !(valid_symbols[STRING_START] && next_tok_is_string_start) &&
                   !within_brackets)) &&
                 indent_length < current_indent_length &&
+                !scanner->inside_f_string &&
 
                 // Wait to create a dedent token until we've consumed any
                 // comments
@@ -386,7 +435,7 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
         if (end_character(&delimiter)) {
             VEC_PUSH(scanner->delimiters, delimiter);
             lexer->result_symbol = STRING_START;
-
+            scanner->inside_f_string = is_format(&delimiter);
             return true;
         }
         if (has_flags) {
@@ -398,36 +447,37 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer,
 }
 
 unsigned tree_sitter_starlark_external_scanner_serialize(void *payload,
-                                                         char *buffer) {
+                                                       char *buffer) {
     Scanner *scanner = (Scanner *)payload;
 
     size_t size = 0;
 
-    size_t delimiter_count = scanner->delimiters->len;
+    buffer[size++] = (char)scanner->inside_f_string;
+
+    size_t delimiter_count = scanner->delimiters.len;
     if (delimiter_count > UINT8_MAX) {
         delimiter_count = UINT8_MAX;
     }
     buffer[size++] = (char)delimiter_count;
 
     if (delimiter_count > 0) {
-        memcpy(&buffer[size], scanner->delimiters->data, delimiter_count);
+        memcpy(&buffer[size], scanner->delimiters.data, delimiter_count);
     }
     size += delimiter_count;
 
     int iter = 1;
-    for (; iter < scanner->indents->len &&
+    for (; iter < scanner->indents.len &&
            size < TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
          ++iter) {
-        // yeah, it narrows the value but it's fine?
-        buffer[size++] = (char)scanner->indents->data[iter];
+        buffer[size++] = (char)scanner->indents.data[iter];
     }
 
     return size;
 }
 
 void tree_sitter_starlark_external_scanner_deserialize(void *payload,
-                                                       const char *buffer,
-                                                       unsigned length) {
+                                                     const char *buffer,
+                                                     unsigned length) {
     Scanner *scanner = (Scanner *)payload;
 
     VEC_CLEAR(scanner->delimiters);
@@ -437,31 +487,31 @@ void tree_sitter_starlark_external_scanner_deserialize(void *payload,
     if (length > 0) {
         size_t size = 0;
 
+        scanner->inside_f_string = (bool)buffer[size++];
+
         size_t delimiter_count = (uint8_t)buffer[size++];
         if (delimiter_count > 0) {
             VEC_GROW(scanner->delimiters, delimiter_count);
-            scanner->delimiters->len = delimiter_count;
-            memcpy(scanner->delimiters->data, &buffer[size], delimiter_count);
+            scanner->delimiters.len = delimiter_count;
+            memcpy(scanner->delimiters.data, &buffer[size], delimiter_count);
             size += delimiter_count;
         }
 
         for (; size < length; size++) {
             VEC_PUSH(scanner->indents, (unsigned char)buffer[size]);
         }
-
-        assert(size == length);
     }
 }
 
 void *tree_sitter_starlark_external_scanner_create() {
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-    static_assert(sizeof(Delimiter) == sizeof(char), "");
+    _Static_assert(sizeof(Delimiter) == sizeof(char), "");
 #else
     assert(sizeof(Delimiter) == sizeof(char));
 #endif
     Scanner *scanner = calloc(1, sizeof(Scanner));
-    scanner->indents = calloc(1, sizeof(indent_vec));
-    scanner->delimiters = calloc(1, sizeof(delimiter_vec));
+    scanner->indents = indent_vec_new();
+    scanner->delimiters = delimiter_vec_new();
     tree_sitter_starlark_external_scanner_deserialize(scanner, NULL, 0);
     return scanner;
 }
@@ -470,7 +520,5 @@ void tree_sitter_starlark_external_scanner_destroy(void *payload) {
     Scanner *scanner = (Scanner *)payload;
     VEC_FREE(scanner->indents);
     VEC_FREE(scanner->delimiters);
-    free(scanner->indents);
-    free(scanner->delimiters);
     free(scanner);
 }
