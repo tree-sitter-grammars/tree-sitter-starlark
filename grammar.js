@@ -13,33 +13,9 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
-const python = require('tree-sitter-python/grammar');
+const Python = require('tree-sitter-python/grammar');
 
-const PREC = {
-  // this resolves a conflict between the usage of ':' in a lambda vs in a
-  // typed parameter. In the case of a lambda, we don't allow typed parameters.
-  lambda: -2,
-  typed_parameter: -1,
-  conditional: -1,
-
-  parenthesized_expression: 1,
-  parenthesized_list_splat: 1,
-  or: 10,
-  and: 11,
-  not: 12,
-  compare: 13,
-  bitwise_or: 14,
-  bitwise_and: 15,
-  xor: 16,
-  shift: 17,
-  plus: 18,
-  times: 19,
-  unary: 20,
-  power: 21,
-  call: 22,
-};
-
-module.exports = grammar(python, {
+module.exports = grammar(Python, {
   name: 'starlark',
 
   rules: {
@@ -49,12 +25,16 @@ module.exports = grammar(python, {
           alias('assert', $.assert_keyword),
           optional(seq('.', alias(choice('eq', 'ne', 'contains', 'fails'), $.assert_builtin))),
         ),
-        alias(choice(
-          'assert_',
-          'assert_eq',
-          'assert_ne',
-          'assert_contains',
-          'assert_fails'), $.assert_keyword),
+        alias(
+          choice(
+            'assert_',
+            'assert_eq',
+            'assert_ne',
+            'assert_contains',
+            'assert_fails',
+          ),
+          $.assert_keyword,
+        ),
       ),
       commaSep1($.expression),
     ),
@@ -132,7 +112,7 @@ module.exports = grammar(python, {
     ),
 
     // Starlark has no `is` operator
-    comparison_operator: $ => prec.left(PREC.compare, seq(
+    comparison_operator: $ => prec.left(Python.PREC.compare, seq(
       $.primary_expression,
       repeat1(seq(
         field('operators',
@@ -152,7 +132,7 @@ module.exports = grammar(python, {
     )),
 
     // Starlark has no generator expressions
-    call: $ => prec(PREC.call, seq(
+    call: $ => prec(Python.PREC.call, seq(
       field('function', $.primary_expression),
       field('arguments', $.argument_list),
     )),
@@ -167,7 +147,7 @@ module.exports = grammar(python, {
     ),
 
     // Starlark has no yield statements
-    parenthesized_expression: $ => prec(PREC.parenthesized_expression, seq(
+    parenthesized_expression: $ => prec(Python.PREC.parenthesized_expression, seq(
       '(',
       $.expression,
       ')',
@@ -201,7 +181,7 @@ module.exports = grammar(python, {
   },
 });
 
-module.exports.PREC = PREC;
+module.exports.PREC = Python.PREC;
 
 /**
  * Creates a rule to match one or more of the rules separated by a comma
