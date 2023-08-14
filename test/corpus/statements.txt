@@ -43,8 +43,14 @@ print >> a, "b", "c"
   (print_statement
     (chevron
       (identifier))
-    (string)
-    (string)))
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
+    (string
+      (string_start)
+      (string_content)
+      (string_end))))
 
 ================================================================================
 Assert statements
@@ -379,7 +385,10 @@ with e as f, g as h,:
           (call
             (identifier)
             (argument_list
-              (string)))
+              (string
+                (string_start)
+                (string_content)
+                (string_end))))
           (as_pattern_target
             (identifier))))
       (with_item
@@ -387,7 +396,10 @@ with e as f, g as h,:
           (call
             (identifier)
             (argument_list
-              (string)))
+              (string
+                (string_start)
+                (string_content)
+                (string_end))))
           (as_pattern_target
             (identifier)))))
     (block
@@ -492,9 +504,11 @@ async def d(a:str="default", b=c) -> None:
       (typed_parameter
         (identifier)
         type: (type
-          (subscript
-            value: (identifier)
-            subscript: (identifier)))))
+          (generic_type
+            (identifier)
+            (type_parameter
+              (type
+                (identifier)))))))
     return_type: (type
       (identifier))
     body: (block
@@ -533,7 +547,10 @@ async def d(a:str="default", b=c) -> None:
         name: (identifier)
         type: (type
           (identifier))
-        value: (string))
+        value: (string
+          (string_start)
+          (string_content)
+          (string_end)))
       (default_parameter
         name: (identifier)
         value: (identifier)))
@@ -705,31 +722,31 @@ g
         (identifier)
         (argument_list
           (integer))))
-	(decorator
-	  (attribute
+    (decorator
+      (attribute
         (attribute
           (subscript
             (identifier)
             (integer))
-              (identifier))
-            (identifier)))
-        (function_definition
-          (identifier)
-          (parameters)
-          (block)))
-      (expression_statement
-        (identifier))
-      (decorated_definition
-        (decorator
-          (call
-            (identifier)
-            (argument_list)))
-        (function_definition
-          (identifier)
-          (parameters)
-          (block)))
-      (expression_statement
+          (identifier))
         (identifier)))
+    (function_definition
+      (identifier)
+      (parameters)
+      (block)))
+  (expression_statement
+    (identifier))
+  (decorated_definition
+    (decorator
+      (call
+        (identifier)
+        (argument_list)))
+    (function_definition
+      (identifier)
+      (parameters)
+      (block)))
+  (expression_statement
+    (identifier)))
 
 ================================================================================
 Comments
@@ -846,7 +863,10 @@ print "a"
 
 (module
   (print_statement
-    (string))
+    (string
+      (string_start)
+      (string_content)
+      (string_end)))
   (comment))
 
 ================================================================================
@@ -861,12 +881,21 @@ exec 'x+=1' in a, b
 
 (module
   (exec_statement
-    (string))
+    (string
+      (string_start)
+      (string_content)
+      (string_end)))
   (exec_statement
-    (string)
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
     (none))
   (exec_statement
-    (string)
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
     (identifier)
     (identifier)))
 
@@ -933,11 +962,18 @@ or len("aa")
       (call
         (identifier)
         (argument_list
-          (string)))
+          (string
+            (string_start)
+            (string_content)
+            (string_end))))
+      (line_continuation)
       (call
         (identifier)
         (argument_list
-          (string))))))
+          (string
+            (string_start)
+            (string_content)
+            (string_end)))))))
 
 ================================================================================
 Statements with semicolons

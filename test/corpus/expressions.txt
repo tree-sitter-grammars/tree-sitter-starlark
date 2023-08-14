@@ -100,19 +100,21 @@ return await i(j, 5)
 
 (module
   (expression_statement
-    (await
-      (call
+    (call
+      (identifier)
+      (ERROR
+        (identifier))
+      (argument_list
         (identifier)
-        (argument_list
-          (identifier)
-          (integer)))))
+        (integer))))
   (return_statement
-    (await
-      (call
+    (call
+      (identifier)
+      (ERROR
+        (identifier))
+      (argument_list
         (identifier)
-        (argument_list
-          (identifier)
-          (integer))))))
+        (integer)))))
 
 ================================================================================
 Call expressions
@@ -281,18 +283,27 @@ exec("""exec _code_ in _globs_, _locs_""")
       (identifier)
       (argument_list
         (string
-          (escape_sequence)
-          (escape_sequence))
+          (string_start)
+          (string_content
+            (escape_sequence)
+            (escape_sequence))
+          (string_end))
         (dictionary
           (pair
-            (string)
+            (string
+              (string_start)
+              (string_content)
+              (string_end))
             (none)))
         (identifier))))
   (expression_statement
     (call
       (identifier)
       (argument_list
-        (string)))))
+        (string
+          (string_start)
+          (string_content)
+          (string_end))))))
 
 ================================================================================
 Async / await used as identifiers
@@ -640,9 +651,11 @@ tail_leaves: List[Leaf] = []
     (assignment
       (identifier)
       (type
-        (subscript
+        (generic_type
           (identifier)
-          (identifier)))
+          (type_parameter
+            (type
+              (identifier)))))
       (list))))
 
 ================================================================================
@@ -757,7 +770,10 @@ foo(x := 3, cat='vector')
           (integer))
         (keyword_argument
           (identifier)
-          (string)))))
+          (string
+            (string_start)
+            (string_content)
+            (string_end))))))
   (expression_statement
     (parenthesized_expression
       (named_expression
@@ -791,7 +807,10 @@ lambda (a, b): (a, b)
         (identifier)
         (argument_list
           (binary_operator
-            (string)
+            (string
+              (string_start)
+              (string_content)
+              (string_end))
             (identifier))))))
   (expression_statement
     (lambda
@@ -903,7 +922,7 @@ async with a as b:
 
 ===========================================
 Arbitrary indentation between brackets
-==========================================
+===========================================
 
 def a():
     b(
