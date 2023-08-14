@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/amaanq/tree-sitter-starlark/compare/v1.0.0...v1.1.0) (2023-08-14)
+
+
+### Features
+
+* **ci:** rework release action ([1430316](https://github.com/amaanq/tree-sitter-starlark/commit/1430316da19cf9024819219e4b72fb3b6f8f141a))
+* update scanner from upstream ([da129fb](https://github.com/amaanq/tree-sitter-starlark/commit/da129fb3469552a817311a1abcbb1290ec07c9dc))
+
 ## 1.0.0 (2023-06-20)
 
 
