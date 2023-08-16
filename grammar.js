@@ -18,6 +18,10 @@ const Python = require('tree-sitter-python/grammar');
 module.exports = grammar(Python, {
   name: 'starlark',
 
+  conflicts: (_, original) => original.filter((e) =>
+    !(e.length == 2 && e[0].name == 'type_alias_statement' && e[1].name =='primary_expression'),
+  ),
+
   rules: {
     assert_statement: $ => seq(
       choice(
@@ -88,7 +92,6 @@ module.exports = grammar(Python, {
     primary_expression: $ => choice(
       $.binary_operator,
       $.identifier,
-      alias('match', $.identifier),
       $.keyword_identifier,
       $.string,
       $.integer,
@@ -109,6 +112,7 @@ module.exports = grammar(Python, {
       $.tuple,
       $.parenthesized_expression,
       $.ellipsis,
+      alias($.list_splat_pattern, $.list_splat),
     ),
 
     // Starlark has no `is` operator
@@ -125,7 +129,7 @@ module.exports = grammar(Python, {
             '>',
             '<>',
             'in',
-            seq('not', 'in'),
+            alias(seq('not', 'in'), 'not in'),
           )),
         $.primary_expression,
       )),
@@ -144,6 +148,7 @@ module.exports = grammar(Python, {
       $.expression_list,
       $.assignment,
       $.augmented_assignment,
+      $.pattern_list,
     ),
 
     // Starlark has no yield statements
@@ -165,19 +170,24 @@ module.exports = grammar(Python, {
     _f_expression: $ => choice(
       $.expression,
       $.expression_list,
+      $.pattern_list,
     ),
 
     // Add struct to keyword identifiers
-    keyword_identifier: $ => prec(-3, alias(
-      choice(
-        'print',
-        'exec',
-        'async',
-        'await',
-        'struct',
-      ),
-      $.identifier,
-    )),
+    keyword_identifier: $ => choice(
+      prec(-3, alias(
+        choice(
+          'print',
+          'exec',
+          'async',
+          'await',
+          'match',
+          'struct',
+        ),
+        $.identifier,
+      )),
+      alias('type', $.identifier),
+    ),
   },
 });
 
