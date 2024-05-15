@@ -9,10 +9,19 @@
 //! tree-sitter [Parser][], and then use the parser to parse some code:
 //!
 //! ```
-//! let code = "";
+//! use tree_sitter::Parser;
+//!
+//! let code = r#"
+//! load("//tools/build_defs/starlark:starlark.bzl", "starlark_library")
+//! starlark_library(
+//!     name = "example",
+//!     srcs = ["example.star"],
+//! )
+//! "#;
 //! let mut parser = tree_sitter::Parser::new();
-//! parser.set_language(tree_sitter_starlark::language()).expect("Error loading Starlark grammar");
+//! parser.set_language(&tree_sitter_starlark::language()).expect("Error loading Starlark grammar");
 //! let tree = parser.parse(code, None).unwrap();
+//! assert!(!tree.root_node().has_error());
 //! ```
 //!
 //! [Language]: https://docs.rs/tree-sitter/*/tree_sitter/struct.Language.html
@@ -33,8 +42,10 @@ pub fn language() -> Language {
     unsafe { tree_sitter_starlark() }
 }
 
-/// The source of the Rust tree-sitter grammar description.
-pub const GRAMMAR: &str = include_str!("../../grammar.js");
+/// The content of the [`node-types.json`][] file for this grammar.
+///
+/// [`node-types.json`]: https://tree-sitter.github.io/tree-sitter/using-parsers#static-node-types
+pub const NODE_TYPES: &str = include_str!("../../src/node-types.json");
 
 /// The folds query for this language.
 pub const FOLDS_QUERY: &str = include_str!("../../queries/folds.scm");
@@ -51,18 +62,13 @@ pub const INJECTIONS_QUERY: &str = include_str!("../../queries/injections.scm");
 /// The symbol tagging query for this language.
 pub const LOCALS_QUERY: &str = include_str!("../../queries/locals.scm");
 
-/// The content of the [`node-types.json`][] file for this grammar.
-///
-/// [`node-types.json`]: https://tree-sitter.github.io/tree-sitter/using-parsers#static-node-types
-pub const NODE_TYPES: &str = include_str!("../../src/node-types.json");
-
 #[cfg(test)]
 mod tests {
     #[test]
     fn test_can_load_grammar() {
         let mut parser = tree_sitter::Parser::new();
         parser
-            .set_language(super::language())
+            .set_language(&super::language())
             .expect("Error loading Starlark grammar");
     }
 }

@@ -9,12 +9,12 @@
 
 ;; Identifier naming conventions
 ((identifier) @type
- (#lua-match? @type "^[A-Z].*[a-z]"))
+ (#match? @type "^[A-Z].*[a-z]"))
 ((identifier) @constant
- (#lua-match? @constant "^[A-Z][A-Z_0-9]*$"))
+ (#match? @constant "^[A-Z][A-Z_0-9]*$"))
 
 ((identifier) @constant.builtin
- (#lua-match? @constant.builtin "^__[a-zA-Z0-9_]*__$"))
+ (#match? @constant.builtin "^__[a-zA-Z0-9_]*__$"))
 
 ((identifier) @constant.builtin
  (#any-of? @constant.builtin
@@ -278,11 +278,11 @@
 
 ((call
    function: (identifier) @constructor)
- (#lua-match? @constructor "^[A-Z]"))
+ (#match? @constructor "^[A-Z]"))
 
 ((call
   function: (attribute
               attribute: (identifier) @constructor))
- (#lua-match? @constructor "^[A-Z]"))
+ (#match? @constructor "^[A-Z]"))
 
 

@@ -25,11 +25,12 @@ match command.split():
     (block
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))))
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))))
         (block
           (expression_statement
             (call
@@ -45,11 +46,12 @@ match command.split():
               (argument_list)))))
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))))
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))))
         (block
           (expression_statement
             (call
@@ -59,12 +61,15 @@ match command.split():
               (argument_list)))))
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))
-            (identifier)))
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))
+            (case_pattern
+              (dotted_name
+                (identifier)))))
         (block
           (expression_statement
             (call
@@ -76,12 +81,15 @@ match command.split():
                 (identifier))))))
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))
-            (identifier)))
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))
+            (case_pattern
+              (dotted_name
+                (identifier)))))
         (block
           (expression_statement
             (assignment
@@ -114,13 +122,15 @@ match command.split():
     (block
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))
-            (list_splat
-              (identifier))))
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))
+            (case_pattern
+              (splat_pattern
+                (identifier)))))
         (block
           (for_statement
             (identifier)
@@ -160,39 +170,44 @@ match command.split():
       (comment)
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))))
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))))
         (block
           (expression_statement
             (ellipsis))
           (comment)))
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))
-            (identifier)))
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))
+            (case_pattern
+              (dotted_name
+                (identifier)))))
         (block
           (pass_statement)))
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))
-            (list_splat
-              (identifier))))
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))
+            (case_pattern
+              (splat_pattern
+                (identifier)))))
         (block
           (pass_statement)))
       (case_clause
-        (case_pattern
-          (identifier))
+        (case_pattern)
         (block
           (expression_statement
             (call
@@ -227,21 +242,24 @@ match command.split():
     (block
       (case_clause
         (case_pattern
-          (binary_operator
-            (list
-              (string
-                (string_start)
-                (string_content)
-                (string_end)))
-            (list
-              (string
-                (string_start)
-                (string_content)
-                (string_end))
-              (string
-                (string_start)
-                (string_content)
-                (string_end)))))
+          (union_pattern
+            (list_pattern
+              (case_pattern
+                (string
+                  (string_start)
+                  (string_content)
+                  (string_end))))
+            (list_pattern
+              (case_pattern
+                (string
+                  (string_start)
+                  (string_content)
+                  (string_end)))
+              (case_pattern
+                (string
+                  (string_start)
+                  (string_content)
+                  (string_end))))))
         (block
           (expression_statement
             (assignment
@@ -257,34 +275,44 @@ match command.split():
                     (string_end))))))))
       (case_clause
         (case_pattern
-          (binary_operator
-            (binary_operator
-              (list
+          (union_pattern
+            (list_pattern
+              (case_pattern
                 (string
                   (string_start)
                   (string_content)
-                  (string_end))
-                (identifier))
-              (list
+                  (string_end)))
+              (case_pattern
+                (dotted_name
+                  (identifier))))
+            (list_pattern
+              (case_pattern
                 (string
                   (string_start)
                   (string_content)
-                  (string_end))
+                  (string_end)))
+              (case_pattern
                 (string
                   (string_start)
                   (string_content)
-                  (string_end))
-                (identifier)))
-            (list
-              (string
-                (string_start)
-                (string_content)
-                (string_end))
-              (identifier)
-              (string
-                (string_start)
-                (string_content)
-                (string_end)))))
+                  (string_end)))
+              (case_pattern
+                (dotted_name
+                  (identifier))))
+            (list_pattern
+              (case_pattern
+                (string
+                  (string_start)
+                  (string_content)
+                  (string_end)))
+              (case_pattern
+                (dotted_name
+                  (identifier)))
+              (case_pattern
+                (string
+                  (string_start)
+                  (string_content)
+                  (string_end))))))
         (block
           (pass_statement))))))
 
@@ -307,33 +335,34 @@ match command.split():
     (block
       (case_clause
         (case_pattern
-          (list
-            (string
-              (string_start)
-              (string_content)
-              (string_end))
-            (as_pattern
-              (parenthesized_expression
-                (binary_operator
-                  (binary_operator
-                    (binary_operator
-                      (string
-                        (string_start)
-                        (string_content)
-                        (string_end))
-                      (string
-                        (string_start)
-                        (string_content)
-                        (string_end)))
-                    (string
-                      (string_start)
-                      (string_content)
-                      (string_end)))
-                  (string
-                    (string_start)
-                    (string_content)
-                    (string_end))))
-              (as_pattern_target
+          (list_pattern
+            (case_pattern
+              (string
+                (string_start)
+                (string_content)
+                (string_end)))
+            (case_pattern
+              (as_pattern
+                (case_pattern
+                  (tuple_pattern
+                    (case_pattern
+                      (union_pattern
+                        (string
+                          (string_start)
+                          (string_content)
+                          (string_end))
+                        (string
+                          (string_start)
+                          (string_content)
+                          (string_end))
+                        (string
+                          (string_start)
+                          (string_content)
+                          (string_end))
+                        (string
+                          (string_start)
+                          (string_content)
+                          (string_end))))))
                 (identifier)))))
         (block
           (expression_statement
@@ -546,7 +575,7 @@ match (0, 1, 2):
         (case_pattern
           (integer))
         (case_pattern
-          (list_splat
+          (splat_pattern
             (identifier)))
         (block
           (expression_statement
@@ -568,7 +597,7 @@ match x,:
     (block
       (case_clause
         (case_pattern
-          (list_splat
+          (splat_pattern
             (identifier)))
         (block
           (expression_statement
@@ -593,9 +622,11 @@ match ..., ...:
     (block
       (case_clause
         (case_pattern
-          (identifier))
+          (dotted_name
+            (identifier)))
         (case_pattern
-          (identifier))
+          (dotted_name
+            (identifier)))
         (block
           (return_statement
             (call
@@ -623,7 +654,8 @@ match match:
     (block
       (case_clause
         (case_pattern
-          (identifier))
+          (dotted_name
+            (identifier)))
         (block
           (expression_statement
             (assignment
