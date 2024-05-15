@@ -2,37 +2,54 @@
   "name": "tree-sitter-starlark",
   "version": "1.1.0",
   "description": "Starlark grammar for tree-sitter",
+  "repository": "github:tree-sitter-grammars/tree-sitter-python",
+  "license": "MIT",
+  "author": "Amaan Qureshi <amaanq12@gmail.com>",
   "main": "bindings/node",
+  "types": "bindings/node",
+  "files": [
+    "grammar.js",
+    "binding.gyp",
+    "prebuilds/**",
+    "bindings/node/*",
+    "queries/*",
+    "src/**"
+  ],
   "keywords": [
-    "parser",
-    "lexer",
+    "incremental",
+    "parsing",
+    "tree-sitter",
     "starlark",
     "bazel",
     "bzl",
     "build"
   ],
-  "author": "Amaan Qureshi <amaanq12@gmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/amaanq/tree-sitter-starlark/issues"
-  },
-  "homepage": "https://github.com/amaanq/tree-sitter-starlark#readme",
   "dependencies": {
-    "nan": "^2.17.0",
-    "tree-sitter-python": "github:tree-sitter/tree-sitter-python"
+    "tree-sitter-python": "^0.21.0",
+    "node-addon-api": "^7.1.0",
+    "node-gyp-build": "^4.8.0"
   },
   "devDependencies": {
-    "eslint": "^8.47.0",
+    "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0",
-    "tree-sitter-cli": "^0.20.8"
+    "prebuildify": "^6.0.1",
+    "tree-sitter-cli": "^0.22.6"
   },
-  "repository": "https://github.com/amaanq/tree-sitter-starlark",
+  "peerDependencies": {
+    "tree-sitter": "^0.21.0"
+  },
+  "peerDependenciesMeta": {
+    "tree_sitter": {
+      "optional": true
+    }
+  },
   "scripts": {
-    "build": "tree-sitter generate && node-gyp build",
+    "build": "tree-sitter generate --no-bindings",
     "lint": "eslint grammar.js",
     "parse": "tree-sitter parse",
-    "test": "tree-sitter test && script/parse-examples",
-    "test-windows": "tree-sitter test"
+    "test": "tree-sitter test",
+    "install": "node-gyp-build",
+    "prebuildify": "prebuildify --napi --strip"
   },
   "tree-sitter": [
     {
@@ -44,5 +61,47 @@
         "queries/highlights.scm"
       ]
     }
-  ]
+  ],
+  "eslintConfig": {
+    "env": {
+      "commonjs": true,
+      "es2021": true
+    },
+    "extends": "google",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "rules": {
+      "arrow-parens": "off",
+      "camel-case": "off",
+      "indent": [
+        "error",
+        2,
+        {
+          "SwitchCase": 1
+        }
+      ],
+      "max-len": [
+        "error",
+        {
+          "code": 160,
+          "ignoreComments": true,
+          "ignoreUrls": true,
+          "ignoreStrings": true
+        }
+      ],
+      "spaced-comment": [
+        "warn",
+        "always",
+        {
+          "line": {
+            "markers": [
+              "/"
+            ]
+          }
+        }
+      ]
+    }
+  }
 }

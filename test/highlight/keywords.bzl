@@ -16,7 +16,7 @@ for i in foo():
 # <- repeat
 #   ^ variable
 #     ^ keyword.operator
-#        ^ variable
+#        ^ function.call
     continue
     # <- repeat
     break
