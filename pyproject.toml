@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tree-sitter-starlark"
 description = "Starlark grammar for tree-sitter"
-version = "1.2.0"
+version = "1.3.0"
 keywords = ["incremental", "parsing", "tree-sitter", "starlark"]
 classifiers = [
   "Intended Audience :: Developers",

@@ -4,7 +4,7 @@ endif
 
 LANGUAGE_NAME := tree-sitter-starlark
 HOMEPAGE_URL := https://github.com/tree-sitter-grammars/tree-sitter-starlark
-VERSION := 1.2.0
+VERSION := 1.3.0
 
 # repository
 SRC_DIR := src

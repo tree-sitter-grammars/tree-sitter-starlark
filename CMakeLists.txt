@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(tree-sitter-starlark
-        VERSION "1.2.0"
+        VERSION "1.3.0"
         DESCRIPTION "Starlark grammar for tree-sitter"
         HOMEPAGE_URL "https://github.com/tree-sitter-grammars/tree-sitter-starlark"
         LANGUAGES C)
