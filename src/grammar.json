@@ -1,4 +1,5 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "starlark",
   "inherits": "python",
   "word": "identifier",
@@ -4049,6 +4050,32 @@
         ]
       }
     },
+    "_not_in": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "not"
+        },
+        {
+          "type": "STRING",
+          "value": "in"
+        }
+      ]
+    },
+    "_is_not": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "is"
+        },
+        {
+          "type": "STRING",
+          "value": "not"
+        }
+      ]
+    },
     "comparison_operator": {
       "type": "PREC_LEFT",
       "value": 13,
@@ -5603,7 +5630,7 @@
                 },
                 {
                   "type": "PATTERN",
-                  "value": "\\d{3}"
+                  "value": "\\d{1,3}"
                 },
                 {
                   "type": "PATTERN",
@@ -6187,6 +6214,10 @@
     ],
     [
       "print_statement",
+      "primary_expression"
+    ],
+    [
+      "type_alias_statement",
       "primary_expression"
     ]
   ],

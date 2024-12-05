@@ -280,32 +280,6 @@
     ]
   },
   {
-    "type": "aliased_import",
-    "named": true,
-    "fields": {
-      "alias": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "identifier",
-            "named": true
-          }
-        ]
-      },
-      "name": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "dotted_name",
-            "named": true
-          }
-        ]
-      }
-    }
-  },
-  {
     "type": "argument_list",
     "named": true,
     "fields": {},
@@ -1375,44 +1349,6 @@
     }
   },
   {
-    "type": "except_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "block",
-          "named": true
-        },
-        {
-          "type": "expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "except_group_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "block",
-          "named": true
-        },
-        {
-          "type": "expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "exec_statement",
     "named": true,
     "fields": {
@@ -1475,21 +1411,6 @@
         },
         {
           "type": "expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "finally_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "block",
           "named": true
         }
       ]
@@ -1771,11 +1692,6 @@
         ]
       }
     }
-  },
-  {
-    "type": "import_prefix",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "interpolation",
@@ -2138,6 +2054,7 @@
   {
     "type": "module",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -2325,25 +2242,6 @@
       "types": [
         {
           "type": "chevron",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "relative_import",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "dotted_name",
-          "named": true
-        },
-        {
-          "type": "import_prefix",
           "named": true
         }
       ]
@@ -2861,11 +2759,6 @@
     }
   },
   {
-    "type": "wildcard_import",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "with_clause",
     "named": true,
     "fields": {},
@@ -3079,6 +2972,10 @@
     "named": false
   },
   {
+    "type": "\\",
+    "named": false
+  },
+  {
     "type": "]",
     "named": false
   },
@@ -3092,10 +2989,6 @@
   },
   {
     "type": "_",
-    "named": false
-  },
-  {
-    "type": "__future__",
     "named": false
   },
   {
@@ -3119,19 +3012,11 @@
     "named": false
   },
   {
-    "type": "await",
-    "named": false
-  },
-  {
     "type": "break",
     "named": false
   },
   {
     "type": "case",
-    "named": false
-  },
-  {
-    "type": "class",
     "named": false
   },
   {
@@ -3171,24 +3056,12 @@
     "named": true
   },
   {
-    "type": "except",
-    "named": false
-  },
-  {
-    "type": "except*",
-    "named": false
-  },
-  {
     "type": "exec",
     "named": false
   },
   {
     "type": "false",
     "named": true
-  },
-  {
-    "type": "finally",
-    "named": false
   },
   {
     "type": "float",
@@ -3199,23 +3072,11 @@
     "named": false
   },
   {
-    "type": "from",
-    "named": false
-  },
-  {
-    "type": "global",
-    "named": false
-  },
-  {
     "type": "identifier",
     "named": true
   },
   {
     "type": "if",
-    "named": false
-  },
-  {
-    "type": "import",
     "named": false
   },
   {
@@ -3243,10 +3104,6 @@
     "named": true
   },
   {
-    "type": "nonlocal",
-    "named": false
-  },
-  {
     "type": "not",
     "named": false
   },
@@ -3267,10 +3124,6 @@
     "named": false
   },
   {
-    "type": "raise",
-    "named": false
-  },
-  {
     "type": "return",
     "named": false
   },
@@ -3287,14 +3140,6 @@
     "named": true
   },
   {
-    "type": "try",
-    "named": false
-  },
-  {
-    "type": "type",
-    "named": false
-  },
-  {
     "type": "type_conversion",
     "named": true
   },
@@ -3304,10 +3149,6 @@
   },
   {
     "type": "with",
-    "named": false
-  },
-  {
-    "type": "yield",
     "named": false
   },
   {
