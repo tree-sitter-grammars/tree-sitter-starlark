@@ -3,8 +3,8 @@ package tree_sitter_starlark_test
 import (
 	"testing"
 
-	tree_sitter "github.com/smacker/go-tree-sitter"
-	"github.com/tree-sitter/tree-sitter-starlark"
+	tree_sitter "github.com/tree-sitter/go-tree-sitter"
+	tree_sitter_starlark "github.com/tree-sitter-grammars/tree-sitter-starlark/bindings/go"
 )
 
 func TestCanLoadGrammar(t *testing.T) {

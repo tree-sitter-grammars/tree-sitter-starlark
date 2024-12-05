@@ -3,36 +3,35 @@ import PackageDescription
 
 let package = Package(
     name: "TreeSitterStarlark",
-    platforms: [.macOS(.v10_13), .iOS(.v11)],
     products: [
         .library(name: "TreeSitterStarlark", targets: ["TreeSitterStarlark"]),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/ChimeHQ/SwiftTreeSitter", from: "0.8.0"),
+    ],
     targets: [
-        .target(name: "TreeSitterStarlark",
-                path: ".",
-                exclude: [
-                    "binding.gyp",
-                    "bindings",
-                    "Cargo.toml",
-                    "examples",
-                    "test",
-                    "grammar.js",
-                    "LICENSE",
-                    "package.json",
-                    "README.md",
-                    "script",
-                    "src/grammar.json",
-                    "src/node-types.json",
-                ],
-                sources: [
-                    "src/parser.c",
-                    "src/scanner.c",
-                ],
-                resources: [
-                    .copy("queries")
-                ],
-                publicHeadersPath: "bindings/swift",
-                cSettings: [.headerSearchPath("src")])
-    ]
+        .target(
+            name: "TreeSitterStarlark",
+            dependencies: [],
+            path: ".",
+            sources: [
+                "src/parser.c",
+                "src/scanner.c",
+            ],
+            resources: [
+                .copy("queries")
+            ],
+            publicHeadersPath: "bindings/swift",
+            cSettings: [.headerSearchPath("src")]
+        ),
+        .testTarget(
+            name: "TreeSitterStarlarkTests",
+            dependencies: [
+                "SwiftTreeSitter",
+                "TreeSitterStarlark",
+            ],
+            path: "bindings/swift/TreeSitterStarlarkTests"
+        )
+    ],
+    cLanguageStandard: .c11
 )

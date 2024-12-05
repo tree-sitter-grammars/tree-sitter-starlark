@@ -1,0 +1,39 @@
+{
+  "grammars": [
+    {
+      "name": "starlark",
+      "camelcase": "Starlark",
+      "scope": "source.bzl",
+      "file-types": [
+        "bzl"
+      ],
+      "highlights": "queries/highlights.scm",
+      "tags": "queries/tags.scm",
+      "locals": "queries/locals.scm",
+      "injections": "queries/injections.scm",
+      "injection-regex": "^starlark$"
+    }
+  ],
+  "metadata": {
+    "version": "1.2.0",
+    "license": "MIT",
+    "description": "Starlark grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Amaan Qureshi",
+        "email": "amaanq12@gmail.com"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tree-sitter-grammars/tree-sitter-starlark"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true
+  }
+}

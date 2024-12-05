@@ -7,9 +7,7 @@
  * @see {@link https://bazel.build/rules/language|official language guide}
  */
 
-/* eslint-disable arrow-parens */
-/* eslint-disable camelcase */
-/* eslint-disable-next-line spaced-comment */
+
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
@@ -19,7 +17,7 @@ module.exports = grammar(Python, {
   name: 'starlark',
 
   conflicts: (_, original) => original.filter((e) =>
-    !(e.length == 2 && e[0].name == 'type_alias_statement' && e[1].name =='primary_expression'),
+    !(e.length == 2 && e[0].name == 'match_statement' && e[1].name == 'primary_expression'),
   ),
 
   rules: {
@@ -198,22 +196,20 @@ module.exports.PREC = Python.PREC;
  *
  * @param {Rule} rule
  *
- * @return {SeqRule}
- *
+ * @returns {SeqRule}
  */
 function commaSep1(rule) {
   return sep1(rule, ',');
 }
 
 /**
-* Creates a rule to match one or more of the rules separated by the separator
-*
-* @param {Rule} rule
-* @param {string} separator - The separator to use.
-*
-* @return {SeqRule}
-*
-*/
+ * Creates a rule to match one or more of the rules separated by the separator
+ *
+ * @param {Rule} rule
+ * @param {string} separator - The separator to use.
+ *
+ * @returns {SeqRule}
+ */
 function sep1(rule, separator) {
   return seq(rule, repeat(seq(separator, rule)));
 }
