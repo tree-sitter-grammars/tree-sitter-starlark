@@ -3,9 +3,10 @@
     {
       "name": "starlark",
       "camelcase": "Starlark",
-      "scope": "source.bzl",
+      "scope": "source.bazel",
       "file-types": [
-        "bzl"
+        "bzl",
+        "star"
       ],
       "highlights": "queries/highlights.scm",
       "tags": "queries/tags.scm",
@@ -27,13 +28,5 @@
     "links": {
       "repository": "https://github.com/tree-sitter-grammars/tree-sitter-starlark"
     }
-  },
-  "bindings": {
-    "c": true,
-    "go": true,
-    "node": true,
-    "python": true,
-    "rust": true,
-    "swift": true
   }
 }
