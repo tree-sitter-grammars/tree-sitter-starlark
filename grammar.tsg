@@ -1,0 +1,165 @@
+// Starlark grammar for tree-sitter (native DSL).
+// Extends tree-sitter-python.
+
+let py = inherit("../tree-sitter-python/grammar.tsg")
+
+macro comma_sep1(item: rule_t) rule_t {
+    seq(item, repeat(seq(",", item)))
+}
+
+grammar {
+    language: "starlark",
+    inherits: py,
+    // Python conflicts minus [match_statement, primary_expression].
+    conflicts: [
+        [primary_expression, pattern],
+        [primary_expression, list_splat_pattern],
+        [tuple, tuple_pattern],
+        [list, list_pattern],
+        [with_item, _collection_elements],
+        [named_expression, as_pattern],
+        [print_statement, primary_expression],
+        [type_alias_statement, primary_expression],
+    ],
+}
+
+override rule assert_statement {
+    seq(
+        choice(
+            seq(
+                alias("assert", assert_keyword),
+                optional(seq(".", alias(choice("eq", "ne", "contains", "fails"), assert_builtin))),
+            ),
+            alias(
+                choice("assert_", "assert_eq", "assert_ne", "assert_contains", "assert_fails"),
+                assert_keyword,
+            ),
+        ),
+        comma_sep1(expression),
+    )
+}
+
+// Starlark has no yield statements.
+override rule expression_statement {
+    choice(
+        expression,
+        seq(comma_sep1(expression), optional(",")),
+        assignment,
+        augmented_assignment,
+    )
+}
+
+// No global/import/nonlocal/raise statements.
+override rule _simple_statement {
+    choice(
+        print_statement,
+        assert_statement,
+        expression_statement,
+        return_statement,
+        delete_statement,
+        pass_statement,
+        break_statement,
+        continue_statement,
+        exec_statement,
+    )
+}
+
+// No try statements (no exceptions), no class definitions.
+override rule _compound_statement {
+    choice(
+        if_statement,
+        for_statement,
+        while_statement,
+        with_statement,
+        function_definition,
+        decorated_definition,
+        match_statement,
+    )
+}
+
+// Remove class definitions from decorated definitions.
+override rule decorated_definition {
+    seq(repeat1(decorator), field(definition, function_definition))
+}
+
+// No concatenated strings, no generators.
+override rule primary_expression {
+    choice(
+        binary_operator,
+        identifier,
+        keyword_identifier,
+        string,
+        integer,
+        float,
+        true,
+        false,
+        none,
+        unary_operator,
+        attribute,
+        subscript,
+        call,
+        list,
+        list_comprehension,
+        dictionary,
+        dictionary_comprehension,
+        set,
+        set_comprehension,
+        tuple,
+        parenthesized_expression,
+        ellipsis,
+        alias(list_splat_pattern, list_splat),
+    )
+}
+
+// No `is` operator.
+override rule comparison_operator {
+    prec_left(py::PREC.compare, seq(
+        primary_expression,
+        repeat1(seq(
+            field(operators, choice(
+                "<", "<=", "==", "!=", ">=", ">", "<>", "in",
+                alias(seq("not", "in"), "not in"),
+            )),
+            primary_expression,
+        )),
+    ))
+}
+
+// No generator expressions.
+override rule call {
+    prec(py::PREC.call, seq(
+        field(function, primary_expression),
+        field(arguments, argument_list),
+    ))
+}
+
+// No yield statements.
+override rule _right_hand_side {
+    choice(expression, expression_list, assignment, augmented_assignment, pattern_list)
+}
+
+override rule parenthesized_expression {
+    prec(py::PREC.parenthesized_expression, seq("(", expression, ")"))
+}
+
+override rule _collection_elements {
+    seq(
+        comma_sep1(choice(expression, list_splat, parenthesized_list_splat)),
+        optional(","),
+    )
+}
+
+override rule _f_expression {
+    choice(expression, expression_list, pattern_list)
+}
+
+// Add struct to keyword identifiers.
+override rule keyword_identifier {
+    choice(
+        prec(-3, alias(
+            choice("print", "exec", "async", "await", "match", "struct"),
+            identifier,
+        )),
+        alias("type", identifier),
+    )
+}
