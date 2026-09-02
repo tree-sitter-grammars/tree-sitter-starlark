@@ -21,6 +21,25 @@ grammar {
         [print_statement, primary_expression],
         [type_alias_statement, primary_expression],
     ],
+    // Exclude inherited Python keywords whose productions are removed below;
+    // reserved sets may only contain tokens used by reachable grammar rules.
+    reserved: {
+        global: [
+            "False", "await", "else", "pass",
+            "None", "break", "except", "in",
+            "True", "return", "and", "continue", "for", "lambda",
+            "as", "def", "while", "assert", "del", "not", "with",
+            "async", "elif", "if", "or",
+        ],
+    },
+    supertypes: [
+        _simple_statement,
+        _compound_statement,
+        expression,
+        primary_expression,
+        pattern,
+        parameter,
+    ],
 }
 
 override rule assert_statement {
