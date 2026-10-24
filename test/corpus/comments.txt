@@ -1,0 +1,174 @@
+================================================================================
+Comments
+================================================================================
+
+# a file comment
+a
+# between statements
+b  # trailing
+c
+
+--------------------------------------------------------------------------------
+
+(module
+  (comment)
+  (expression_statement
+    (identifier))
+  (comment)
+  (expression_statement
+    (identifier))
+  (comment)
+  (expression_statement
+    (identifier)))
+
+================================================================================
+Comments at different indentation levels
+================================================================================
+
+if a:
+    # one
+# two
+        # three
+    b
+        # four
+    c
+
+--------------------------------------------------------------------------------
+
+(module
+  (if_statement
+    (identifier)
+    (comment)
+    (comment)
+    (comment)
+    (block
+      (expression_statement
+        (identifier))
+      (comment)
+      (expression_statement
+        (identifier)))))
+
+================================================================================
+Comments after dedents
+================================================================================
+
+if a:
+    b
+
+# one
+c
+
+--------------------------------------------------------------------------------
+
+(module
+  (if_statement
+    (identifier)
+    (block
+      (expression_statement
+        (identifier))))
+  (comment)
+  (expression_statement
+    (identifier)))
+
+================================================================================
+Comments at the ends of indented blocks
+================================================================================
+
+if a:
+    b
+    # one
+    # two
+
+if c:
+    d
+        # three
+            # four
+
+# five
+
+--------------------------------------------------------------------------------
+
+(module
+  (if_statement
+    (identifier)
+    (block
+      (expression_statement
+        (identifier))
+      (comment)
+      (comment)))
+  (if_statement
+    (identifier)
+    (block
+      (expression_statement
+        (identifier))
+      (comment)
+      (comment)))
+  (comment))
+
+================================================================================
+Comments inside brackets
+================================================================================
+
+f(
+    a,  # first
+    # second
+    b,
+)
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (call
+      (identifier)
+      (argument_list
+        (identifier)
+        (comment)
+        (comment)
+        (identifier)))))
+
+================================================================================
+Comment-only file
+================================================================================
+
+# nothing here
+    # not even indented code
+
+--------------------------------------------------------------------------------
+
+(module
+  (comment)
+  (comment))
+
+================================================================================
+Arbitrary indentation inside brackets
+================================================================================
+
+def a():
+    b(
+1,
+2
+    )
+
+    c = [
+3
+    ]
+
+--------------------------------------------------------------------------------
+
+(module
+  (function_definition
+    (identifier)
+    (parameters)
+    (block
+      (expression_statement
+        (call
+          (identifier)
+          (argument_list
+            (integer)
+            (integer))))
+      (expression_statement
+        (assignment
+          (identifier)
+          (list
+            (integer)))))))

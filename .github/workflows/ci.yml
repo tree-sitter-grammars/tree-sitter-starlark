@@ -9,6 +9,7 @@ on:
       - test/**
       - bindings/**
       - binding.gyp
+      - package.json
   pull_request:
     paths:
       - grammar.js
@@ -16,6 +17,7 @@ on:
       - test/**
       - bindings/**
       - binding.gyp
+      - package.json
 
 concurrency:
   group: ${{github.workflow}}-${{github.ref}}
@@ -33,19 +35,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Set up tree-sitter
-        uses: tree-sitter/setup-action/cli@v1
+        uses: tree-sitter/setup-action/cli@v2
       - name: Set up examples
         run: |-
           git clone https://github.com/bazelbuild/starlark examples/starlark --single-branch --depth=1 --filter=blob:none
           git clone https://github.com/mcuadros/ascode examples/ascode --single-branch --depth=1 --filter=blob:none
           git clone https://github.com/cruise-automation/isopod examples/isopod --single-branch --depth=1 --filter=blob:none
       - name: Run tests
-        uses: tree-sitter/parser-test-action@v2
+        uses: tree-sitter/parser-test-action@v3
         with:
           test-rust: true
           test-node: true
           test-python: true
           test-go: true
+          # go-tree-sitter with ABI 15 support requires Go 1.23 (see go.mod).
+          go-version: "1.23"
           test-swift: true
       - name: Parse examples
         id: test
@@ -72,3 +76,20 @@ jobs:
             !examples/starlark/test_suite/testdata/rust/int.star
             !examples/starlark/test_suite/testdata/rust/josharian_fuzzing.star
             !examples/starlark/test_suite/testdata/rust/mutation_during_iteration.star
+  typescript:
+    name: Test TypeScript consumer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: ${{vars.NODE_VERSION}}
+      - name: Install modules
+        run: npm ci --legacy-peer-deps
+      - name: Build the wasm, compile and run the consumer
+        run: npm run test:types

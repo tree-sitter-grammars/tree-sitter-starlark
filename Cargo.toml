@@ -1,8 +1,8 @@
 [package]
 name = "tree-sitter-starlark"
-description = "Starlark grammar for tree-sitter"
-version = "1.3.0"
-authors = ["Amaan Qureshi <amaanq12@gmail.com>"]
+description = "Starlark grammar for tree-sitter, following the language spec"
+version = "2.0.0"
+authors = ["Amaan Qureshi <amaanq12@gmail.com>", "Andre Brisco"]
 license = "MIT"
 readme = "README.md"
 keywords = ["incremental", "parsing", "tree-sitter", "starlark"]
@@ -30,4 +30,7 @@ tree-sitter-language = "0.1"
 cc = "1.2"
 
 [dev-dependencies]
-tree-sitter = "0.24"
+tree-sitter = "0.27"
+# The reference parser, used by tests/spec_oracle.rs to check that this
+# grammar accepts and rejects the same programs as the spec implementation.
+starlark_syntax = "0.14"

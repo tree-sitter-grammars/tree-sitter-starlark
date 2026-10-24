@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tree-sitter-starlark"
-description = "Starlark grammar for tree-sitter"
-version = "1.3.0"
+description = "Starlark grammar for tree-sitter, following the language spec"
+version = "2.0.0"
 keywords = ["incremental", "parsing", "tree-sitter", "starlark"]
 classifiers = [
   "Intended Audience :: Developers",
@@ -14,7 +14,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 authors = [{ name = "Amaan Qureshi", email = "amaanq12@gmail.com" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license.text = "MIT"
 readme = "README.md"
 
@@ -22,8 +22,8 @@ readme = "README.md"
 Homepage = "https://github.com/tree-sitter-grammars/tree-sitter-starlark"
 
 [project.optional-dependencies]
-core = ["tree-sitter~=0.22"]
+core = ["tree-sitter~=0.25"]
 
 [tool.cibuildwheel]
-build = "cp39-*"
+build = "cp310-*"
 build-frontend = "build"

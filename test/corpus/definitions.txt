@@ -1,0 +1,172 @@
+================================================================================
+Function definitions
+================================================================================
+
+def a():
+    b
+
+def c(d):
+    e
+
+def g(h, i,):
+    j
+
+def k(): pass
+
+--------------------------------------------------------------------------------
+
+(module
+  (function_definition
+    (identifier)
+    (parameters)
+    (block
+      (expression_statement
+        (identifier))))
+  (function_definition
+    (identifier)
+    (parameters
+      (identifier))
+    (block
+      (expression_statement
+        (identifier))))
+  (function_definition
+    (identifier)
+    (parameters
+      (identifier)
+      (identifier))
+    (block
+      (expression_statement
+        (identifier))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (block
+      (pass_statement))))
+
+================================================================================
+Parameters with defaults and splats
+================================================================================
+
+def f(a, b = c, *d, e, g = h, **i):
+    pass
+
+def k(*, l):
+    pass
+
+def m(**n):
+    pass
+
+--------------------------------------------------------------------------------
+
+(module
+  (function_definition
+    (identifier)
+    (parameters
+      (identifier)
+      (default_parameter
+        (identifier)
+        (identifier))
+      (list_splat_pattern
+        (identifier))
+      (identifier)
+      (default_parameter
+        (identifier)
+        (identifier))
+      (dictionary_splat_pattern
+        (identifier)))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (parameters
+      (keyword_separator)
+      (identifier))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (parameters
+      (dictionary_splat_pattern
+        (identifier)))
+    (block
+      (pass_statement))))
+
+================================================================================
+Nested definitions and docstrings
+================================================================================
+
+def outer(x):
+    """Returns a closure over x.
+
+    Args:
+        x: captured.
+    """
+    def inner(y):
+        return x + y
+    return inner
+
+--------------------------------------------------------------------------------
+
+(module
+  (function_definition
+    (identifier)
+    (parameters
+      (identifier))
+    (block
+      (expression_statement
+        (string
+          (string_start)
+          (string_content)
+          (string_end)))
+      (function_definition
+        (identifier)
+        (parameters
+          (identifier))
+        (block
+          (return_statement
+            (binary_operator
+              (identifier)
+              (identifier)))))
+      (return_statement
+        (identifier)))))
+
+================================================================================
+Lambda expressions
+================================================================================
+
+f = lambda: True
+g = lambda a, b = c, *d, **e: a
+h(lambda x: x + 1)
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (assignment
+      (identifier)
+      (lambda
+        (true))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (lambda
+        (lambda_parameters
+          (identifier)
+          (default_parameter
+            (identifier)
+            (identifier))
+          (list_splat_pattern
+            (identifier))
+          (dictionary_splat_pattern
+            (identifier)))
+        (identifier))))
+  (expression_statement
+    (call
+      (identifier)
+      (argument_list
+        (lambda
+          (lambda_parameters
+            (identifier))
+          (binary_operator
+            (identifier)
+            (integer)))))))

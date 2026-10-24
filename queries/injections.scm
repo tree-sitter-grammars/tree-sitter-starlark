@@ -1,8 +1,2 @@
-((call
-  function: (attribute
-	  object: (identifier) @_re)
-  arguments: (argument_list (string) @regex))
- (#eq? @_re "re")
- (#match? @regex "^r.*"))
-
-(comment) @comment
+((comment) @injection.content
+  (#set! injection.language "comment"))

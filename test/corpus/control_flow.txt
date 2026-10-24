@@ -1,0 +1,302 @@
+================================================================================
+If statements
+================================================================================
+
+if a:
+    b
+    c
+
+if a:
+    b
+elif c:
+    d
+elif e:
+    f
+else:
+    g
+
+if a: b
+
+--------------------------------------------------------------------------------
+
+(module
+  (if_statement
+    (identifier)
+    (block
+      (expression_statement
+        (identifier))
+      (expression_statement
+        (identifier))))
+  (if_statement
+    (identifier)
+    (block
+      (expression_statement
+        (identifier)))
+    (elif_clause
+      (identifier)
+      (block
+        (expression_statement
+          (identifier))))
+    (elif_clause
+      (identifier)
+      (block
+        (expression_statement
+          (identifier))))
+    (else_clause
+      (block
+        (expression_statement
+          (identifier)))))
+  (if_statement
+    (identifier)
+    (block
+      (expression_statement
+        (identifier)))))
+
+================================================================================
+Nested if statements
+================================================================================
+
+if a:
+    if b:
+        c
+    else:
+        if e:
+            f
+g
+
+--------------------------------------------------------------------------------
+
+(module
+  (if_statement
+    (identifier)
+    (block
+      (if_statement
+        (identifier)
+        (block
+          (expression_statement
+            (identifier)))
+        (else_clause
+          (block
+            (if_statement
+              (identifier)
+              (block
+                (expression_statement
+                  (identifier)))))))))
+  (expression_statement
+    (identifier)))
+
+================================================================================
+For statements
+================================================================================
+
+for x in xs:
+    print(x)
+
+for k, v in d.items():
+    print(k, v)
+
+for (a, b) in pairs:
+    pass
+
+for [a, b] in pairs:
+    pass
+
+for x in (a, b):
+    pass
+
+for (x,) in [(1,), (2,)]:
+    x
+
+--------------------------------------------------------------------------------
+
+(module
+  (for_statement
+    (identifier)
+    (identifier)
+    (block
+      (expression_statement
+        (call
+          (identifier)
+          (argument_list
+            (identifier))))))
+  (for_statement
+    (pattern_list
+      (identifier)
+      (identifier))
+    (call
+      (attribute
+        (identifier)
+        (identifier))
+      (argument_list))
+    (block
+      (expression_statement
+        (call
+          (identifier)
+          (argument_list
+            (identifier)
+            (identifier))))))
+  (for_statement
+    (tuple_pattern
+      (identifier)
+      (identifier))
+    (identifier)
+    (block
+      (pass_statement)))
+  (for_statement
+    (list_pattern
+      (identifier)
+      (identifier))
+    (identifier)
+    (block
+      (pass_statement)))
+  (for_statement
+    (identifier)
+    (tuple
+      (identifier)
+      (identifier))
+    (block
+      (pass_statement)))
+  (for_statement
+    (tuple_pattern
+      (identifier))
+    (list
+      (tuple
+        (integer))
+      (tuple
+        (integer)))
+    (block
+      (expression_statement
+        (identifier)))))
+
+================================================================================
+List comprehensions
+================================================================================
+
+[x for x in xs]
+[a + b for (a, b) in items]
+[a for b in c for a in b]
+[(x, y) for x in xs for y in ys if x if y]
+[a if b else c for a in d]
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (list_comprehension
+      (identifier)
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (list_comprehension
+      (binary_operator
+        (identifier)
+        (identifier))
+      (for_in_clause
+        (tuple_pattern
+          (identifier)
+          (identifier))
+        (identifier))))
+  (expression_statement
+    (list_comprehension
+      (identifier)
+      (for_in_clause
+        (identifier)
+        (identifier))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (list_comprehension
+      (tuple
+        (identifier)
+        (identifier))
+      (for_in_clause
+        (identifier)
+        (identifier))
+      (for_in_clause
+        (identifier)
+        (identifier))
+      (if_clause
+        (identifier))
+      (if_clause
+        (identifier))))
+  (expression_statement
+    (list_comprehension
+      (conditional_expression
+        (identifier)
+        (identifier)
+        (identifier))
+      (for_in_clause
+        (identifier)
+        (identifier)))))
+
+================================================================================
+Dictionary comprehensions
+================================================================================
+
+{a: b for a, b in items}
+{k: v for k in ks for v in vs if k != v}
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (dictionary_comprehension
+      (pair
+        (identifier)
+        (identifier))
+      (for_in_clause
+        (pattern_list
+          (identifier)
+          (identifier))
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (pair
+        (identifier)
+        (identifier))
+      (for_in_clause
+        (identifier)
+        (identifier))
+      (for_in_clause
+        (identifier)
+        (identifier))
+      (if_clause
+        (comparison_operator
+          (identifier)
+          (identifier))))))
+
+================================================================================
+Conditional expressions
+================================================================================
+
+a = b if c else d
+f() if a else d
+a if b else c if d else e
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (assignment
+      (identifier)
+      (conditional_expression
+        (identifier)
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (conditional_expression
+      (call
+        (identifier)
+        (argument_list))
+      (identifier)
+      (identifier)))
+  (expression_statement
+    (conditional_expression
+      (identifier)
+      (identifier)
+      (conditional_expression
+        (identifier)
+        (identifier)
+        (identifier)))))

@@ -6,29 +6,26 @@
 #include <stdio.h>
 #include <string.h>
 
+// Must match the order of `externals` in grammar.js.
 enum TokenType {
     NEWLINE,
     INDENT,
     DEDENT,
     STRING_START,
     STRING_CONTENT,
-    ESCAPE_INTERPOLATION,
     STRING_END,
     COMMENT,
-    CLOSE_PAREN,
     CLOSE_BRACKET,
+    CLOSE_PAREN,
     CLOSE_BRACE,
-    EXCEPT,
 };
 
 typedef enum {
     SingleQuote = 1 << 0,
     DoubleQuote = 1 << 1,
-    BackQuote = 1 << 2,
-    Raw = 1 << 3,
-    Format = 1 << 4,
-    Triple = 1 << 5,
-    Bytes = 1 << 6,
+    Raw = 1 << 2,
+    Triple = 1 << 3,
+    Bytes = 1 << 4,
 } Flags;
 
 typedef struct {
@@ -36,8 +33,6 @@ typedef struct {
 } Delimiter;
 
 static inline Delimiter new_delimiter() { return (Delimiter){0}; }
-
-static inline bool is_format(Delimiter *delimiter) { return delimiter->flags & Format; }
 
 static inline bool is_raw(Delimiter *delimiter) { return delimiter->flags & Raw; }
 
@@ -52,13 +47,8 @@ static inline int32_t end_character(Delimiter *delimiter) {
     if (delimiter->flags & DoubleQuote) {
         return '"';
     }
-    if (delimiter->flags & BackQuote) {
-        return '`';
-    }
     return 0;
 }
-
-static inline void set_format(Delimiter *delimiter) { delimiter->flags |= Format; }
 
 static inline void set_raw(Delimiter *delimiter) { delimiter->flags |= Raw; }
 
@@ -74,9 +64,6 @@ static inline void set_end_character(Delimiter *delimiter, int32_t character) {
         case '"':
             delimiter->flags |= DoubleQuote;
             break;
-        case '`':
-            delimiter->flags |= BackQuote;
-            break;
         default:
             assert(false);
     }
@@ -85,7 +72,6 @@ static inline void set_end_character(Delimiter *delimiter, int32_t character) {
 typedef struct {
     Array(uint16_t) indents;
     Array(Delimiter) delimiters;
-    bool inside_f_string;
 } Scanner;
 
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
@@ -98,35 +84,11 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer, c
     bool error_recovery_mode = valid_symbols[STRING_CONTENT] && valid_symbols[INDENT];
     bool within_brackets = valid_symbols[CLOSE_BRACE] || valid_symbols[CLOSE_PAREN] || valid_symbols[CLOSE_BRACKET];
 
-    bool advanced_once = false;
-    if (valid_symbols[ESCAPE_INTERPOLATION] && scanner->delimiters.size > 0 &&
-        (lexer->lookahead == '{' || lexer->lookahead == '}') && !error_recovery_mode) {
-        Delimiter *delimiter = array_back(&scanner->delimiters);
-        if (is_format(delimiter)) {
-            lexer->mark_end(lexer);
-            bool is_left_brace = lexer->lookahead == '{';
-            advance(lexer);
-            advanced_once = true;
-            if ((lexer->lookahead == '{' && is_left_brace) || (lexer->lookahead == '}' && !is_left_brace)) {
-                advance(lexer);
-                lexer->mark_end(lexer);
-                lexer->result_symbol = ESCAPE_INTERPOLATION;
-                return true;
-            }
-            return false;
-        }
-    }
-
     if (valid_symbols[STRING_CONTENT] && scanner->delimiters.size > 0 && !error_recovery_mode) {
         Delimiter *delimiter = array_back(&scanner->delimiters);
         int32_t end_char = end_character(delimiter);
-        bool has_content = advanced_once;
+        bool has_content = false;
         while (lexer->lookahead) {
-            if ((advanced_once || lexer->lookahead == '{' || lexer->lookahead == '}') && is_format(delimiter)) {
-                lexer->mark_end(lexer);
-                lexer->result_symbol = STRING_CONTENT;
-                return has_content;
-            }
             if (lexer->lookahead == '\\') {
                 if (is_raw(delimiter)) {
                     // Step over the backslash.
@@ -177,7 +139,6 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer, c
                                 lexer->mark_end(lexer);
                                 array_pop(&scanner->delimiters);
                                 lexer->result_symbol = STRING_END;
-                                scanner->inside_f_string = false;
                             }
                             return true;
                         }
@@ -195,7 +156,6 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer, c
                     advance(lexer);
                     array_pop(&scanner->delimiters);
                     lexer->result_symbol = STRING_END;
-                    scanner->inside_f_string = false;
                 }
                 lexer->mark_end(lexer);
                 return true;
@@ -228,7 +188,7 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer, c
             indent_length += 8;
             skip(lexer);
         } else if (lexer->lookahead == '#' && (valid_symbols[INDENT] || valid_symbols[DEDENT] ||
-                                               valid_symbols[NEWLINE] || valid_symbols[EXCEPT])) {
+                                               valid_symbols[NEWLINE])) {
             // If we haven't found an EOL yet,
             // then this is a comment after an expression:
             //   foo = bar # comment
@@ -274,13 +234,12 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer, c
                 return true;
             }
 
-            bool next_tok_is_string_start =
-                lexer->lookahead == '\"' || lexer->lookahead == '\'' || lexer->lookahead == '`';
+            bool next_tok_is_string_start = lexer->lookahead == '\"' || lexer->lookahead == '\'';
 
             if ((valid_symbols[DEDENT] ||
                  (!valid_symbols[NEWLINE] && !(valid_symbols[STRING_START] && next_tok_is_string_start) &&
                   !within_brackets)) &&
-                indent_length < current_indent_length && !scanner->inside_f_string &&
+                indent_length < current_indent_length &&
 
                 // Wait to create a dedent token until we've consumed any
                 // comments
@@ -302,25 +261,20 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer, c
         Delimiter delimiter = new_delimiter();
 
         bool has_flags = false;
+        // Prefixes: r, b, rb, br. The spec has no uppercase forms.
         while (lexer->lookahead) {
-            if (lexer->lookahead == 'f' || lexer->lookahead == 'F') {
-                set_format(&delimiter);
-            } else if (lexer->lookahead == 'r' || lexer->lookahead == 'R') {
+            if (lexer->lookahead == 'r') {
                 set_raw(&delimiter);
-            } else if (lexer->lookahead == 'b' || lexer->lookahead == 'B') {
+            } else if (lexer->lookahead == 'b') {
                 set_bytes(&delimiter);
-            } else if (lexer->lookahead != 'u' && lexer->lookahead != 'U') {
+            } else {
                 break;
             }
             has_flags = true;
             advance(lexer);
         }
 
-        if (lexer->lookahead == '`') {
-            set_end_character(&delimiter, '`');
-            advance(lexer);
-            lexer->mark_end(lexer);
-        } else if (lexer->lookahead == '\'') {
+        if (lexer->lookahead == '\'') {
             set_end_character(&delimiter, '\'');
             advance(lexer);
             lexer->mark_end(lexer);
@@ -349,7 +303,6 @@ bool tree_sitter_starlark_external_scanner_scan(void *payload, TSLexer *lexer, c
         if (end_character(&delimiter)) {
             array_push(&scanner->delimiters, delimiter);
             lexer->result_symbol = STRING_START;
-            scanner->inside_f_string = is_format(&delimiter);
             return true;
         }
         if (has_flags) {
@@ -364,8 +317,6 @@ unsigned tree_sitter_starlark_external_scanner_serialize(void *payload, char *bu
     Scanner *scanner = (Scanner *)payload;
 
     size_t size = 0;
-
-    buffer[size++] = (char)scanner->inside_f_string;
 
     size_t delimiter_count = scanner->delimiters.size;
     if (delimiter_count > UINT8_MAX) {
@@ -395,8 +346,6 @@ void tree_sitter_starlark_external_scanner_deserialize(void *payload, const char
 
     if (length > 0) {
         size_t size = 0;
-
-        scanner->inside_f_string = (bool)buffer[size++];
 
         size_t delimiter_count = (uint8_t)buffer[size++];
         if (delimiter_count > 0) {

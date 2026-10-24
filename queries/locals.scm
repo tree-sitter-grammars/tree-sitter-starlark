@@ -1,91 +1,86 @@
 ;;; Program structure
+
 (module) @scope
 
-; Function with parameters, defines parameters
+;;; Loads define names
+
+(load_statement
+  (string) @definition.import)
+
+(aliased_load
+  alias: (identifier) @definition.import)
+
+;;; Functions define parameters, a function and a scope
+
 (parameters
   (identifier) @definition.parameter)
 
 (default_parameter
-  (identifier) @definition.parameter)
+  name: (identifier) @definition.parameter)
 
-(typed_parameter
-  (identifier) @definition.parameter)
-
-(typed_default_parameter
-  (identifier) @definition.parameter)
-
-; *args parameter
 (parameters
   (list_splat_pattern
     (identifier) @definition.parameter))
 
-; **kwargs parameter
 (parameters
   (dictionary_splat_pattern
     (identifier) @definition.parameter))
 
-; Function defines function and scope
 ((function_definition
   name: (identifier) @definition.function) @scope
- (#set! definition.function.scope "parent"))
+  (#set! definition.function.scope "parent"))
 
-;;; Loops
-; not a scope!
-(for_statement
-  left: (pattern_list
-          (identifier) @definition.var))
-(for_statement
-  left: (tuple_pattern
-          (identifier) @definition.var))
+(lambda_parameters
+  (identifier) @definition.parameter)
+
+(lambda) @scope
+
+;;; Loops (not a scope in Starlark)
+
 (for_statement
   left: (identifier) @definition.var)
 
-; for in list comprehension
+(for_statement
+  left: (pattern_list
+    (identifier) @definition.var))
+
+(for_statement
+  left: (tuple_pattern
+    (identifier) @definition.var))
+
 (for_in_clause
   left: (identifier) @definition.var)
-(for_in_clause
-  left: (tuple_pattern
-          (identifier) @definition.var))
+
 (for_in_clause
   left: (pattern_list
-          (identifier) @definition.var))
+    (identifier) @definition.var))
+
+(for_in_clause
+  left: (tuple_pattern
+    (identifier) @definition.var))
+
+(list_comprehension) @scope
 
 (dictionary_comprehension) @scope
-(list_comprehension) @scope
-(set_comprehension) @scope
 
 ;;; Assignments
 
 (assignment
- left: (identifier) @definition.var)
+  left: (identifier) @definition.var)
 
 (assignment
- left: (pattern_list
-   (identifier) @definition.var))
-(assignment
- left: (tuple_pattern
-   (identifier) @definition.var))
+  left: (pattern_list
+    (identifier) @definition.var))
 
 (assignment
- left: (attribute
-   (identifier)
-   (identifier) @definition.field))
+  left: (tuple_pattern
+    (identifier) @definition.var))
 
-; Walrus operator  x := 1
-(named_expression
-  (identifier) @definition.var)
+(assignment
+  left: (attribute
+    (identifier)
+    (identifier) @definition.field))
 
-(as_pattern 
-  alias: (as_pattern_target) @definition.var)
+;;; References
 
-;;; REFERENCES
 (identifier) @reference
-
-;; Starlark-specific
-
-; Loads
-((call
-  function: (identifier) @_fn
-  arguments: (argument_list
-    (string) @definition.import))
-  (#eq? @_fn "load"))

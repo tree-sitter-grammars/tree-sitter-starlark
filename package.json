@@ -1,7 +1,8 @@
 {
   "name": "tree-sitter-starlark",
-  "version": "1.3.0",
-  "description": "Starlark grammar for tree-sitter",
+  "version": "2.0.0",
+  "description": "Starlark grammar for tree-sitter, following the language spec",
+  "type": "module",
   "repository": "https://github.com/tree-sitter-grammars/tree-sitter-starlark",
   "license": "MIT",
   "author": {
@@ -10,11 +11,39 @@
   },
   "main": "bindings/node",
   "types": "bindings/node",
+  "exports": {
+    ".": {
+      "types": "./bindings/node/index.d.ts",
+      "default": "./bindings/node/index.js"
+    },
+    "./node-types": {
+      "import": {
+        "types": "./bindings/node/node-types.d.ts"
+      },
+      "require": {
+        "types": "./bindings/node/node-types.d.cts"
+      }
+    },
+    "./tree-sitter-starlark.wasm": "./tree-sitter-starlark.wasm",
+    "./grammar.js": "./grammar.js",
+    "./tree-sitter.json": "./tree-sitter.json",
+    "./package.json": "./package.json",
+    "./queries/*": "./queries/*",
+    "./src/*": "./src/*"
+  },
+  "typesVersions": {
+    "*": {
+      "node-types": [
+        "bindings/node/node-types.d.ts"
+      ]
+    }
+  },
   "keywords": [
     "incremental",
     "parsing",
     "tree-sitter",
-    "starlark"
+    "starlark",
+    "bazel"
   ],
   "files": [
     "grammar.js",
@@ -24,21 +53,22 @@
     "bindings/node/*",
     "queries/*",
     "src/**",
-    "*.wasm"
+    "*.wasm",
+    "scripts/*"
   ],
   "dependencies": {
     "node-addon-api": "^8.3.0",
-    "node-gyp-build": "^4.8.4",
-    "tree-sitter-python": "^0.23.5"
+    "node-gyp-build": "^4.8.4"
   },
   "devDependencies": {
     "eslint": "^9.16.0",
     "eslint-config-treesitter": "^1.0.2",
     "prebuildify": "^6.0.1",
-    "tree-sitter-cli": "^0.24.4"
+    "tree-sitter": "^0.25.0",
+    "tree-sitter-cli": "^0.27.1"
   },
   "peerDependencies": {
-    "tree-sitter": "^0.22.1"
+    "tree-sitter": "^0.25.0"
   },
   "peerDependenciesMeta": {
     "tree-sitter": {
@@ -47,9 +77,13 @@
   },
   "scripts": {
     "install": "node-gyp-build",
-    "lint": "eslint grammar.js",
+    "lint": "eslint grammar.js scripts",
     "prestart": "tree-sitter build --wasm",
     "start": "tree-sitter playground",
-    "test": "node --test bindings/node/*_test.js"
+    "test": "tree-sitter test && node --test bindings/node/*_test.js && npm run test:types",
+    "generate:types": "node scripts/generate-node-types.js",
+    "generate": "tree-sitter generate && npm run generate:types",
+    "build:wasm": "tree-sitter build --wasm",
+    "test:types": "npm run build:wasm && npm --prefix test/typescript install --no-audit --no-fund && npm --prefix test/typescript test"
   }
 }

@@ -5,9 +5,17 @@ on:
     branches: [master]
     paths:
       - grammar.js
+      - scripts/**
+      - src/node-types.json
+      - bindings/node/node-types.d.ts
+      - bindings/node/node-types.d.cts
   pull_request:
     paths:
       - grammar.js
+      - scripts/**
+      - src/node-types.json
+      - bindings/node/node-types.d.ts
+      - bindings/node/node-types.d.cts
 
 jobs:
   lint:
@@ -24,3 +32,7 @@ jobs:
         run: npm ci --legacy-peer-deps
       - name: Run ESLint
         run: npm run lint
+      - name: Check that the TypeScript node types are up to date
+        run: |-
+          npm run generate:types
+          git diff --exit-code -- bindings/node/node-types.d.ts bindings/node/node-types.d.cts

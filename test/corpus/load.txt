@@ -1,26 +1,77 @@
-=====================
-Test a load statement
-=====================
+================================================================================
+Load statements
+================================================================================
 
-load(":foo.bzl", "var", "fct") # loads `var`, and `fct` from `./foo.bzl`
+load(":defs.bzl", "a")
+load("//pkg:defs.bzl", "a", "b")
+load("@repo//pkg:defs.bzl", "a", b = "c")
 
----
+--------------------------------------------------------------------------------
 
 (module
-  (expression_statement
-    (call
+  (load_statement
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
+    (string
+      (string_start)
+      (string_content)
+      (string_end)))
+  (load_statement
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
+    (string
+      (string_start)
+      (string_content)
+      (string_end)))
+  (load_statement
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
+    (aliased_load
       (identifier)
-      (argument_list
-        (string
-          (string_start)
-          (string_content)
-          (string_end))
-        (string
-          (string_start)
-          (string_content)
-          (string_end))
-        (string
-          (string_start)
-          (string_content)
-          (string_end)))))
-  (comment))
+      (string
+        (string_start)
+        (string_content)
+        (string_end)))))
+
+================================================================================
+Load statements spanning lines
+================================================================================
+
+load(
+    "//pkg:defs.bzl",
+    "a",
+    renamed = "b",
+)
+
+--------------------------------------------------------------------------------
+
+(module
+  (load_statement
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
+    (string
+      (string_start)
+      (string_content)
+      (string_end))
+    (aliased_load
+      (identifier)
+      (string
+        (string_start)
+        (string_content)
+        (string_end)))))
